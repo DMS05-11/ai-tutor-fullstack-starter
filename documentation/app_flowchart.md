@@ -1,14 +1,18 @@
 flowchart TD
-  Start[Landing Page]
-  SignUpPage[Sign Up Page]
-  SignInPage[Sign In Page]
-  AuthAPI[Authentication API Endpoint]
-  DashboardPage[Dashboard Page]
-  Start -->|Select Sign Up| SignUpPage
-  Start -->|Select Sign In| SignInPage
-  SignUpPage -->|Submit Credentials| AuthAPI
-  SignInPage -->|Submit Credentials| AuthAPI
-  AuthAPI -->|Success| DashboardPage
-  AuthAPI -->|Error| SignUpPage
-  AuthAPI -->|Error| SignInPage
-  DashboardPage -->|Click Logout| Start
+    Start[Start] --> SignupPage[SignUp Page]
+    SignupPage --> SubmitSignup[Submit Signup]
+    SubmitSignup --> BackendSignup[Create User and Send Verification Email]
+    BackendSignup --> EmailSent[Email Sent]
+    EmailSent -->|User clicks verification link| EmailVerify[Email Verification Endpoint]
+    EmailVerify --> CheckToken{Token Valid}
+    CheckToken -->|Yes| Verified[Mark User as Verified]
+    CheckToken -->|No| VerificationError[Show Invalid Token Error]
+    Verified --> RedirectLogin[Redirect to Login Page]
+    RedirectLogin --> LoginPage[Login Page]
+    LoginPage --> SubmitLogin[Submit Login]
+    SubmitLogin --> AuthCheck[Auth Endpoint Check Credentials and Verified]
+    AuthCheck -->|Success| CourseList[Show Course List]
+    AuthCheck -->|Failure| LoginError[Show Login Error]
+    CourseList -->|Select Course| CourseDetail[Course Viewer Page]
+    CourseDetail --> Logout[Logout]
+    Logout --> End[End]

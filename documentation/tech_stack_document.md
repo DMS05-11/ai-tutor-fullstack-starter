@@ -1,90 +1,105 @@
 # Tech Stack Document
 
-This document explains the key technologies chosen for the **codeguide-starter** project. It’s written in everyday language so anyone—technical or not—can understand why each tool was picked and how it supports the application.
+This document outlines the technology choices made for the AI Tutor application starter template, `ai-tutor-fullstack-starter`. It explains each component in everyday language and clarifies how they work together to build a modern, secure, and maintainable web application.
 
-## 1. Frontend Technologies
-The frontend is everything the user sees and interacts with. For this project, we’ve used:
+## Frontend Technologies
 
-- **Next.js (App Router)**
-  - A React framework that makes page routing, server-side rendering, and API routes very simple.
-  - Enhances user experience by pre-rendering pages on the server or at build time, leading to faster initial load.
-- **React 18**
-  - The underlying library for building user interfaces with reusable components.
-  - Provides a smooth, interactive experience thanks to its virtual DOM and modern hooks.
-- **TypeScript**
-  - A superset of JavaScript that adds types (labels for data).
-  - Helps catch errors early during development and makes the code easier to maintain.
-- **CSS (globals.css & theme.css)**
-  - **globals.css** applies base styles (fonts, colors, resets) across the entire app.
-  - **dashboard/theme.css** defines the look and feel specific to the dashboard area.
-  - This separation keeps styles organized and avoids accidental style conflicts.
+- **Next.js 14+ (App Router)**
+  - Provides file-based routing and server-side rendering out of the box.
+  - Lets us define pages and nested layouts easily (e.g., `/signup`, `/courses`, `/courses/[id]`).
+  - Improves performance with automatic code splitting and static optimization.
 
-By combining these tools, we have a clear structure (Next.js folders for pages and layouts), safer code (TypeScript), and flexible styling with vanilla CSS.
+- **React 18 & TypeScript**
+  - React handles user interface components and state management in a declarative way.
+  - TypeScript adds strong typing to catch errors early, both in your code and in your data structures.
 
-## 2. Backend Technologies
-The backend handles data, user accounts, and the logic behind the scenes. Our choices here are:
+- **Tailwind CSS**
+  - A utility-first CSS framework for rapid styling without leaving your HTML/JSX.
+  - Ensures consistent spacing, colors, and typography across the app.
+
+- **Radix UI**
+  - A library of unstyled, accessible UI primitives (dialogs, menus, tabs).
+  - Works hand-in-hand with Tailwind to build custom, accessible components quickly.
+
+- **Lucide React & Next Themes**
+  - Lucide React supplies a collection of crisp, open-source icons.
+  - Next Themes makes it simple to add dark-mode support and theme switching.
+
+- **Reusable UI Component Library**
+  - Pre-built components (buttons, inputs, cards, data tables) live in `components/ui/`.
+  - Promotes visual consistency and speeds up development.
+
+## Backend Technologies
 
 - **Next.js API Routes**
-  - Allows us to write server-side code (`route.ts` files) alongside our frontend in the same project.
-  - Runs on Node.js, so we can handle requests like sign-up, sign-in, and data fetching in one place.
-- **Node.js Runtime**
-  - The JavaScript environment on the server that executes our API routes.
-- **bcrypt** (npm package)
-  - A library for hashing passwords securely before storing them.
-  - Ensures that even if someone got access to our data, raw passwords aren’t visible.
-- **(Optional) NextAuth.js or JWT**
-  - While this starter kit shows a custom authentication flow, it can easily integrate services like NextAuth.js for email-based login or JWT (JSON Web Tokens) for stateless sessions.
+  - Allows creation of serverless endpoints inside the same project.
+  - Keeps frontend and backend code in one place (`app/api/` directory).
 
-These components work together to receive user credentials, verify or store them securely, manage sessions or tokens, and deliver protected data back to the frontend.
+- **Better Auth**
+  - Simplifies authentication setup with JWT-based sessions and secure cookies.
+  - Handles password hashing and credential validation.
+  - Easily extended to enforce email verification (`isVerified` flag).
 
-## 3. Infrastructure and Deployment
-Infrastructure covers where and how we host the app, as well as how changes get delivered:
+- **PostgreSQL & Drizzle ORM**
+  - PostgreSQL: A reliable, open-source relational database for structured data.
+  - Drizzle ORM: A TypeScript-first ORM that ensures type-safe database queries.
+  - Schemas live in `db/schema/` (e.g., `auth.ts`, `courses.ts`), guaranteeing consistency from database to frontend.
 
-- **Git & GitHub**
-  - Version control system (Git) and remote hosting (GitHub) keep track of all code changes and allow team collaboration.
-- **Vercel (or Netlify)**
-  - A popular hosting service optimized for Next.js, with one-click deployments and global content delivery.
-  - Automatically rebuilds and deploys the site whenever code is pushed to the main branch.
-- **GitHub Actions (CI/CD)**
-  - Automates tasks like linting (ESLint), formatting (Prettier), and running any tests you add.
-  - Ensures that only clean, tested code goes live.
+## Infrastructure and Deployment
 
-Together, these tools provide a reliable, scalable setup where every code change is tested and deployed quickly, with minimal manual work.
+- **Version Control: Git (e.g., GitHub)**
+  - Tracks code changes, enables collaboration, and supports pull-request workflows.
 
-## 4. Third-Party Integrations
-While this starter kit is minimal by design, it already includes or can easily add:
+- **Docker & Docker Compose**
+  - Provides a one-command setup for local development (PostgreSQL container, environment variables).
+  - Ensures every team member has an identical local environment.
 
-- **bcrypt**
-  - For secure password hashing (included as an npm dependency).
-- **NextAuth.js** (optional)
-  - A full-featured authentication library supporting email/password, OAuth, and more.
-- **Sentry or LogRocket** (optional)
-  - For real-time error tracking and performance monitoring in production.
+- **Vercel**
+  - Optimized hosting for Next.js apps.
+  - Automatic CI/CD: pushes to main branch trigger deployments.
+  - Environment variable management and preview deployments for feature branches.
 
-These integrations help extend the app’s capabilities without building every feature from scratch.
+- **CI/CD Pipelines**
+  - Linting (ESLint) and formatting (Prettier) run on every pull request to enforce code quality.
+  - Optional testing steps (Jest for unit tests, Playwright/Cypress for end-to-end) can be integrated.
 
-## 5. Security and Performance Considerations
-We’ve baked in several measures to keep users safe and the app running smoothly:
+## Third-Party Integrations
 
-Security:
-- Passwords are never stored in plain text—bcrypt hashes them with a random salt.
-- API routes can implement CSRF protection and input validation to block malicious requests.
-- Session tokens or cookies are marked secure and HttpOnly to prevent theft via JavaScript.
+- **Email Service (e.g., Resend or Nodemailer)**
+  - Sends verification emails with secure tokens after signup.
+  - Delivers password-reset or notification emails in the future.
 
-Performance:
-- Server-side rendering (SSR) and static site generation (SSG) in Next.js deliver pages faster.
-- Code splitting and lazy-loaded components ensure users only download what they need.
-- Global CSS and theme files are small and cached by the browser for quick repeat visits.
+- **JWT Tokens & Cookies**  
+  - Managed by Better Auth for secure, stateless sessions.
 
-These strategies work together to give users a fast, secure experience every time.
+- **Analytics (Optional)**
+  - Tools like Google Analytics or Plausible can be added to track user behavior, course progress, and engagement.
 
-## 6. Conclusion and Overall Tech Stack Summary
-In building **codeguide-starter**, we chose technologies that:
+## Security and Performance Considerations
 
-- Align with modern web standards (Next.js, React, TypeScript).
-- Provide a clear, file-based project structure for rapid onboarding.
-- Offer built-in support for server-side rendering, API routes, and static assets.
-- Emphasize security through password hashing, session management, and safe defaults.
-- Enable easy scaling and future enhancements via modular code and optional integrations.
+- **Authentication & Authorization**
+  - All protected routes (`/courses`, `/api/courses`) enforce session checks via Better Auth.
+  - Unverified users are blocked from login until they confirm their email.
 
-This stack strikes a balance between simplicity for newcomers and flexibility for experienced teams. It accelerates development of a secure authentication flow and a polished dashboard, while leaving room to plug in databases, test suites, and advanced features as the project grows.
+- **Data Validation**
+  - API routes validate incoming data and return clear error codes (400 for bad input, 401 for unauthorized, 404 for not found).
+
+- **Secure Password Handling**
+  - Passwords are hashed before saving in PostgreSQL.
+  - No raw passwords stored or logged.
+
+- **Performance Optimizations**
+  - Next.js does automatic code splitting and image optimization.
+  - Server-side rendering (SSR) and caching strategies can be added per page.
+  - Type-safe Drizzle queries reduce runtime errors and unexpected database calls.
+
+## Conclusion and Overall Tech Stack Summary
+
+This tech stack aligns closely with the AI Tutor application’s goals:
+
+- **Rapid UI development** through Next.js, React, Tailwind CSS, and Radix UI.
+- **Robust backend** powered by Next.js API routes, Better Auth, and PostgreSQL with Drizzle ORM.
+- **Smooth developer experience** using TypeScript, Docker, and Vercel’s CI/CD.
+- **Extensible integrations** for email verification, analytics, and more.
+
+By combining these technologies, the starter kit offers a cohesive, type-safe, and performant foundation, allowing your team to focus on building course content, AI-driven tutoring logic, and delightful student experiences without worrying about boilerplate setup.

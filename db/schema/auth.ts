@@ -7,6 +7,7 @@ export const user = pgTable("user", {
     emailVerified: boolean("email_verified")
         .$defaultFn(() => false)
         .notNull(),
+    passwordHash: text("password_hash").notNull(),
     image: text("image"),
     createdAt: timestamp("created_at")
         .$defaultFn(() => /* @__PURE__ */ new Date())

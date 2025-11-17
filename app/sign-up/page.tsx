@@ -12,16 +12,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { signUp } from "@/lib/auth-client";
-import { Loader2, Eye, EyeOff } from "lucide-react";
+import { Loader2, Eye, EyeOff, MailCheck } from "lucide-react";
 
 const signUpSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters"),
     email: z.string().email("Invalid email address"),
     password: z
         .string()
-        .min(8, "Password must be at least 8 characters")
-        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
+        .min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
@@ -33,6 +31,7 @@ type SignUpForm = z.infer<typeof signUpSchema>;
 export default function SignUpPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const router = useRouter();
@@ -50,21 +49,40 @@ export default function SignUpPage() {
     const onSubmit = async (data: SignUpForm) => {
         setIsLoading(true);
         setError("");
+        setSuccess("");
 
         try {
-            const result = await signUp.email({
-                email: data.email,
-                password: data.password,
-                name: data.name,
+            const response = await fetch('/api/auth/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: data.name,
+                    email: data.email,
+                    password: data.password,
+                }),
             });
 
-            if (result.error) {
-                setError(result.error.message || "Sign up failed");
+            const result = await response.json();
+
+            if (!response.ok) {
+                if (result.details && Array.isArray(result.details)) {
+                    setError(result.details.map((detail: any) => detail.message).join(', '));
+                } else {
+                    setError(result.error || 'Sign up failed');
+                }
             } else {
-                router.push("/dashboard");
+                setSuccess(result.message || 'Account created successfully! Please check your email to verify your account.');
+                // Clear form
+                form.reset();
+                // Redirect to sign-in after 3 seconds
+                setTimeout(() => {
+                    router.push('/sign-in');
+                }, 3000);
             }
         } catch (err) {
-            setError("An unexpected error occurred");
+            setError("Network error. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -85,6 +103,13 @@ export default function SignUpPage() {
                             {error && (
                                 <Alert variant="destructive">
                                     <AlertDescription>{error}</AlertDescription>
+                                </Alert>
+                            )}
+
+                            {success && (
+                                <Alert className="border-green-200 bg-green-50 text-green-800">
+                                    <MailCheck className="h-4 w-4" />
+                                    <AlertDescription>{success}</AlertDescription>
                                 </Alert>
                             )}
                             
