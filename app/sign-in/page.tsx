@@ -1,41 +1,68 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { signIn } from "@/lib/auth-client";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle } from "lucide-react";
 
 export default function SignInPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const router = useRouter();
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        const message = searchParams.get('message');
+        const verified = searchParams.get('verified');
+
+        if (verified === 'true') {
+            setSuccess('Email verified successfully! You can now log in.');
+        }
+        if (message) {
+            setSuccess(decodeURIComponent(message));
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
+        setSuccess("");
 
         try {
-            const result = await signIn.email({
-                email,
-                password,
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
             });
 
-            if (result.error) {
-                setError(result.error.message || "Sign in failed");
+            const result = await response.json();
+
+            if (!response.ok) {
+                setError(result.error || 'Sign in failed');
             } else {
-                router.push("/dashboard");
+                setSuccess('Login successful! Redirecting...');
+                // Get return URL from search params or default to courses
+                const returnUrl = searchParams.get('returnUrl');
+                setTimeout(() => {
+                    router.push(returnUrl ? decodeURIComponent(returnUrl) : '/courses');
+                }, 1000);
             }
         } catch (err) {
-            setError("An unexpected error occurred");
+            setError("Network error. Please try again.");
         } finally {
             setIsLoading(false);
         }
@@ -55,6 +82,13 @@ export default function SignInPage() {
                         {error && (
                             <Alert variant="destructive">
                                 <AlertDescription>{error}</AlertDescription>
+                            </Alert>
+                        )}
+
+                        {success && (
+                            <Alert className="border-green-200 bg-green-50 text-green-800">
+                                <CheckCircle className="h-4 w-4" />
+                                <AlertDescription>{success}</AlertDescription>
                             </Alert>
                         )}
                         <div className="space-y-2">
